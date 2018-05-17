@@ -1,6 +1,6 @@
 package org.livingdoc.converters.time
 
-import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockitokotlin2.mock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.DynamicTest
@@ -29,14 +29,15 @@ internal abstract class TemporalConverterContract<T : Temporal> {
     abstract val customFormatValue: Pair<String, T>
     abstract val malformedCustomFormat: String
 
-    @TestFactory fun `default input format variations`(): List<DynamicTest> {
+    @TestFactory
+    fun `default input format variations`(): List<DynamicTest> {
         return validInputVariations
-                .map { (value, expectedResult) ->
-                    dynamicTest("$value is valid input format", {
-                        val result = cut.convert(value, null, null)
-                        assertThat(result).isEqualTo(expectedResult)
-                    })
-                }
+            .map { (value, expectedResult) ->
+                dynamicTest("$value is valid input format", {
+                    val result = cut.convert(value, null, null)
+                    assertThat(result).isEqualTo(expectedResult)
+                })
+            }
     }
 
 
@@ -83,7 +84,5 @@ internal abstract class TemporalConverterContract<T : Temporal> {
                 cut.convert(value, element, null)
             }
         }
-
     }
-
 }

@@ -1,6 +1,6 @@
 package org.livingdoc.converters.number
 
-import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockitokotlin2.mock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Nested
@@ -29,9 +29,11 @@ internal abstract class NumberConverterContract<T : Number> {
         assertThatValueCanBeConverted(minValue)
     }
 
+
     @Test fun `negative value can be converted`() {
         assertThatValueCanBeConverted(negativeValue)
     }
+
 
     @Test fun `zero value can be converted`() {
         assertThatValueCanBeConverted(zeroValue)
