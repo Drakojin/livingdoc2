@@ -3,7 +3,6 @@ package org.livingdoc.engine.execution.examples.decisiontables
 import io.mockk.every
 import io.mockk.verify
 import io.mockk.verifySequence
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -15,6 +14,11 @@ import org.livingdoc.repositories.model.decisiontable.DecisionTable
 import org.livingdoc.repositories.model.decisiontable.Field
 import org.livingdoc.repositories.model.decisiontable.Header
 import org.livingdoc.repositories.model.decisiontable.Row
+import strikt.api.expect
+import strikt.api.expectThat
+import strikt.assertions.hasSize
+import strikt.assertions.isA
+import strikt.assertions.isEqualTo
 
 internal class DecisionTableExecutorTest {
 
@@ -37,7 +41,7 @@ internal class DecisionTableExecutorTest {
         val rows = arrayListOf(row1, row2)
 
         val resultTable = cut.execute(DecisionTable(headers, rows), LifeCycleFixture::class.java, null)
-        assertThat(resultTable.result).isInstanceOf(Executed::class.java)
+        expectThat(resultTable.result).isA<Executed>()
 
         val fixture = LifeCycleFixture.callback
         verifySequence {
@@ -64,10 +68,10 @@ internal class DecisionTableExecutorTest {
         val fixtureClass = MalformedFixtures.NoDefaultConstructor::class.java
 
         val tableResult = cut.execute(decisionTable, fixtureClass, null).result
-        assertThat(tableResult).isInstanceOf(Exception::class.java)
+        expectThat(tableResult).isA<Exception>()
 
         val exception = (tableResult as Exception).exception
-        assertThat(exception).isInstanceOf(MalformedDecisionTableFixtureException::class.java)
+        expectThat(exception).isA<MalformedDecisionTableFixtureException>()
     }
 
     @Test
@@ -82,11 +86,11 @@ internal class DecisionTableExecutorTest {
         val fixtureClass = LifeCycleFixture::class.java
 
         val tableResult = cut.execute(decisionTable, fixtureClass, null).result
-        assertThat(tableResult).isInstanceOf(Exception::class.java)
-
-        val exception = (tableResult as Exception).exception
-        assertThat(exception).isInstanceOf(UnmappedHeaderException::class.java)
-        assertThat(exception).hasMessageContaining("- unknown")
+        expectThat(tableResult) {
+            isA<Exception>()
+                .get { exception }
+                .isA<UnmappedHeaderException>()
+        }
 
         val fixture = LifeCycleFixture.callback
 
@@ -217,7 +221,7 @@ internal class DecisionTableExecutorTest {
 
                 val inputField = execute(row).rows[0].headerToField[input]!!
 
-                assertThat(inputField.result).isInstanceOf(Exception::class.java)
+                expectThat(inputField.result).isA<Exception>()
             }
 
             @Test
@@ -244,7 +248,7 @@ internal class DecisionTableExecutorTest {
 
                 val inputField = execute(row).rows[0].headerToField[input]!!
 
-                assertThat(inputField.result).isInstanceOf(Failed::class.java)
+                expectThat(inputField.result).isA<Failed>()
             }
 
             @Test
@@ -275,7 +279,7 @@ internal class DecisionTableExecutorTest {
 
                 val checkField = execute(row).rows[0].headerToField[check]!!
 
-                assertThat(checkField.result).isInstanceOf(Exception::class.java)
+                expectThat(checkField.result).isA<Exception>()
             }
 
             @Test
@@ -298,7 +302,7 @@ internal class DecisionTableExecutorTest {
 
                 val checkField = execute(row).rows[0].headerToField[check]!!
 
-                assertThat(checkField.result).isInstanceOf(Failed::class.java)
+                expectThat(checkField.result).isA<Failed>()
             }
 
             @Test
@@ -325,7 +329,7 @@ internal class DecisionTableExecutorTest {
 
                 val row = execute(row).rows[0]
 
-                assertThat(row.result).isInstanceOf(Exception::class.java)
+                expectThat(row.result).isA<Exception>()
             }
 
             @Test
@@ -335,8 +339,10 @@ internal class DecisionTableExecutorTest {
 
                 val rowResult = execute(row).rows[0]
 
-                assertThat(rowResult.headerToField[input]!!.result).isInstanceOf(Skipped::class.java)
-                assertThat(rowResult.headerToField[check]!!.result).isInstanceOf(Skipped::class.java)
+                expect {
+                    that(rowResult.headerToField[input]!!.result).isA<Skipped>()
+                    that(rowResult.headerToField[check]!!.result).isA<Skipped>()
+                }
             }
 
             @Test
@@ -364,7 +370,7 @@ internal class DecisionTableExecutorTest {
 
                 val row = execute(row).rows[0]
 
-                assertThat(row.result).isInstanceOf(Exception::class.java)
+                expectThat(row.result).isA<Exception>()
             }
 
             @Test
@@ -374,8 +380,10 @@ internal class DecisionTableExecutorTest {
 
                 val rowResult = execute(row).rows[0]
 
-                assertThat(rowResult.headerToField[input]!!.result).isInstanceOf(Skipped::class.java)
-                assertThat(rowResult.headerToField[check]!!.result).isInstanceOf(Skipped::class.java)
+                expect {
+                    that(rowResult.headerToField[input]!!.result).isA<Skipped>()
+                    that(rowResult.headerToField[check]!!.result).isA<Skipped>()
+                }
             }
 
             @Test
@@ -407,7 +415,7 @@ internal class DecisionTableExecutorTest {
 
                 val row = execute(row).rows[0]
 
-                assertThat(row.result).isInstanceOf(Exception::class.java)
+                expectThat(row.result).isA<Exception>()
             }
 
             @Test
@@ -417,7 +425,7 @@ internal class DecisionTableExecutorTest {
 
                 val rowResult = execute(row).rows[0]
 
-                assertThat(rowResult.headerToField[check]!!.result).isInstanceOf(Skipped::class.java)
+                expectThat(rowResult.headerToField[check]!!.result).isA<Skipped>()
             }
 
             @Test
@@ -441,7 +449,7 @@ internal class DecisionTableExecutorTest {
 
                 val row = execute(row).rows[0]
 
-                assertThat(row.result).isInstanceOf(Exception::class.java)
+                expectThat(row.result).isA<Exception>()
             }
 
             @Test
@@ -451,7 +459,7 @@ internal class DecisionTableExecutorTest {
 
                 val rowResult = execute(row).rows[0]
 
-                assertThat(rowResult.headerToField[check]!!.result).isInstanceOf(Skipped::class.java)
+                expectThat(rowResult.headerToField[check]!!.result).isA<Skipped>()
             }
 
             @Test
@@ -481,7 +489,7 @@ internal class DecisionTableExecutorTest {
 
                 val row = execute(row).rows[0]
 
-                assertThat(row.result).isInstanceOf(Exception::class.java)
+                expectThat(row.result).isA<Exception>()
             }
 
             @Test
@@ -501,7 +509,7 @@ internal class DecisionTableExecutorTest {
 
                 val row = execute(row).rows[0]
 
-                assertThat(row.result).isInstanceOf(Exception::class.java)
+                expectThat(row.result).isA<Exception>()
             }
 
             @Test
@@ -525,7 +533,7 @@ internal class DecisionTableExecutorTest {
 
                 val table = execute(row)
 
-                assertThat(table.result).isInstanceOf(Exception::class.java)
+                expectThat(table.result).isA<Exception>()
             }
 
             @Test
@@ -536,8 +544,10 @@ internal class DecisionTableExecutorTest {
                 val table = execute(row, anotherRow)
 
                 val rows = table.rows
-                assertThat(rows[0].result).isInstanceOf(Skipped::class.java)
-                assertThat(rows[1].result).isInstanceOf(Skipped::class.java)
+                expect {
+                    that(rows[0].result).isA<Skipped>()
+                    that(rows[1].result).isA<Skipped>()
+                }
             }
 
             @Test
@@ -557,7 +567,7 @@ internal class DecisionTableExecutorTest {
 
                 val table = execute(row)
 
-                assertThat(table.result).isInstanceOf(Exception::class.java)
+                expectThat(table.result).isA<Exception>()
             }
 
             @Test
@@ -568,8 +578,10 @@ internal class DecisionTableExecutorTest {
                 val table = execute(row, anotherRow)
 
                 val rows = table.rows
-                assertThat(rows[0].result).isInstanceOf(Skipped::class.java)
-                assertThat(rows[1].result).isInstanceOf(Skipped::class.java)
+                expect {
+                    that(rows[0].result).isA<Skipped>()
+                    that(rows[1].result).isA<Skipped>()
+                }
             }
 
             @Test
@@ -593,7 +605,7 @@ internal class DecisionTableExecutorTest {
 
                 val table = execute(row)
 
-                assertThat(table.result).isInstanceOf(Exception::class.java)
+                expectThat(table.result).isA<Exception>()
             }
 
             @Test
@@ -603,7 +615,7 @@ internal class DecisionTableExecutorTest {
 
                 val table = execute(row)
 
-                assertThat(table.result).isInstanceOf(Exception::class.java)
+                expectThat(table.result).isA<Exception>()
             }
         }
 
@@ -669,12 +681,12 @@ internal class DecisionTableExecutorTest {
 
         val resultTable = cut.execute(DecisionTable(headers, rows), CalculatorDecisionTableFixture::class.java, null)
 
-        assertThat(resultTable.result).isEqualTo(Executed)
-        assertThat(resultTable.rows).hasSize(4)
+        expectThat(resultTable.result).isEqualTo(Executed)
+        expectThat(resultTable.rows).hasSize(4)
         resultTable.rows.forEach { (headerToField, result) ->
-            assertThat(result).isEqualTo(Executed)
+            expectThat(result).isEqualTo(Executed)
             headerToField.values.forEach { field ->
-                assertThat(field.result).isEqualTo(Executed)
+                expectThat(field.result).isEqualTo(Executed)
             }
         }
     }

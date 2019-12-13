@@ -1,10 +1,11 @@
 package org.livingdoc.engine.execution.examples.scenarios;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static strikt.api.ExpectKt.expectThat;
+import static strikt.assertions.AnyKt.isEqualTo;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.assertj.core.util.Lists;
 import org.livingdoc.api.fixtures.scenarios.Before;
 import org.livingdoc.api.fixtures.scenarios.Binding;
 import org.livingdoc.api.fixtures.scenarios.Step;
@@ -27,12 +28,12 @@ public class SelfCheckoutScenarioFixture {
 
     @Step("when the customer checks out, the total sum is {expectedSum}")
     void checkout(@Binding("expectedSum") Integer sum) {
-        assertThat(sut.checkout()).isEqualTo(sum);
+        isEqualTo(expectThat(sut.checkout()), sum);
     }
 
     private static class SelfCheckout {
 
-        List<LineItem> items = Lists.newArrayList();
+        List<LineItem> items = new ArrayList<>();
 
         private void add(String name, Integer priceInCents) {
             items.add(new LineItem(name, priceInCents));

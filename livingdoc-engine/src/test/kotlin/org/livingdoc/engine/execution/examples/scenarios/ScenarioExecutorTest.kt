@@ -3,15 +3,20 @@ package org.livingdoc.engine.execution.examples.scenarios
 import io.mockk.every
 import io.mockk.verify
 import io.mockk.verifySequence
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.livingdoc.engine.execution.Result
 import org.livingdoc.engine.execution.Result.*
 import org.livingdoc.engine.execution.examples.scenarios.model.ScenarioResult
 import org.livingdoc.repositories.model.scenario.Scenario
 import org.livingdoc.repositories.model.scenario.Step
+import strikt.api.expect
+import strikt.api.expectThat
+import strikt.assertions.containsExactlyInAnyOrder
+import strikt.assertions.hasSize
+import strikt.assertions.isA
+import strikt.assertions.isEqualTo
+import strikt.assertions.toList
 
 internal class ScenarioExecutorTest {
 
@@ -26,10 +31,12 @@ internal class ScenarioExecutorTest {
 
         val scenarioResult = cut.execute(Scenario(steps), SelfCheckoutScenarioFixture::class.java, null)
 
-        assertThat(scenarioResult.result).isEqualTo(Executed)
-        assertThat(scenarioResult.steps).hasSize(3)
+        expect {
+            that(scenarioResult.result).isEqualTo(Executed)
+            that(scenarioResult.steps).hasSize(3)
+        }
         scenarioResult.steps.forEach { step ->
-            assertThat(step.result).isEqualTo(Executed)
+            expectThat(step.result).isEqualTo(Executed)
         }
     }
 
@@ -38,7 +45,7 @@ internal class ScenarioExecutorTest {
         val steps = listOf(Step("step1"), Step("step2"))
 
         val resultScenario = cut.execute(Scenario(steps), LifeCycleFixture::class.java, null)
-        assertThat(resultScenario.result).isEqualTo(Executed)
+        expectThat(resultScenario.result).isEqualTo(Executed)
 
         val fixture = LifeCycleFixture.callback
 
@@ -90,7 +97,7 @@ internal class ScenarioExecutorTest {
         fun `a mismatching parameter results in "Exception"`() {
             val result = execute(Step("Step with mismatching parameter: Oh noes!")).result
 
-            assertThat(result).isInstanceOf(Exception::class.java)
+            expectThat(result).isA<Exception>()
         }
     }
 
@@ -105,7 +112,7 @@ internal class ScenarioExecutorTest {
 
             val result = execute(Step("step1"), Step("step2")).result
 
-            assertThat(result).isInstanceOf(Executed::class.java)
+            expectThat(result).isA<Executed>()
         }
 
         @Test
@@ -114,7 +121,7 @@ internal class ScenarioExecutorTest {
 
             val stepResult = execute(Step("step1"), Step("step2")).steps[0].result
 
-            assertThat(stepResult).isInstanceOf(Failed::class.java)
+            expectThat(stepResult).isA<Failed>()
         }
 
         @Test
@@ -123,7 +130,7 @@ internal class ScenarioExecutorTest {
 
             val stepResult = execute(Step("step1"), Step("step2")).steps[1].result
 
-            assertThat(stepResult).isInstanceOf(Skipped::class.java)
+            expectThat(stepResult).isA<Skipped>()
         }
 
         @Test
@@ -153,7 +160,7 @@ internal class ScenarioExecutorTest {
 
                 val result = execute(Step("step1"), Step("step2")).result
 
-                assertThat(result).isInstanceOf(Exception::class.java)
+                expectThat(result).isA<Exception>()
             }
 
             @Test
@@ -183,8 +190,8 @@ internal class ScenarioExecutorTest {
 
                 val result = execute(Step("step1"), Step("step2"))
 
-                assertThat(result.steps[0].result).isEqualTo(Skipped)
-                assertThat(result.steps[1].result).isEqualTo(Skipped)
+                expectThat(result.steps[0].result).isEqualTo(Skipped)
+                expectThat(result.steps[1].result).isEqualTo(Skipped)
             }
 
             @Test
@@ -209,7 +216,7 @@ internal class ScenarioExecutorTest {
 
                 val result = execute(Step("step1"), Step("step2")).result
 
-                assertThat(result).isInstanceOf(Executed::class.java)
+                expectThat(result).isA<Executed>()
             }
 
             @Test
@@ -218,7 +225,7 @@ internal class ScenarioExecutorTest {
 
                 val stepResult = execute(Step("step1"), Step("step2")).steps[0].result
 
-                assertThat(stepResult).isInstanceOf(Exception::class.java)
+                expectThat(stepResult).isA<Exception>()
             }
 
             @Test
@@ -227,7 +234,7 @@ internal class ScenarioExecutorTest {
 
                 val stepResult = execute(Step("step1"), Step("step2")).steps[1].result
 
-                assertThat(stepResult).isInstanceOf(Skipped::class.java)
+                expectThat(stepResult).isA<Skipped>()
             }
 
             @Test
@@ -252,7 +259,7 @@ internal class ScenarioExecutorTest {
 
                 val result = execute().result
 
-                assertThat(result).isInstanceOf(Exception::class.java)
+                expectThat(result).isA<Exception>()
             }
 
             @Test
@@ -262,10 +269,10 @@ internal class ScenarioExecutorTest {
                 every { fixture.after1() } throws exception1
                 every { fixture.after2() } throws exception2
 
-                val result = execute().result as Result.Exception
+                val result = execute().result as Exception
 
-                assertThat(result.exception).isInstanceOf(ScenarioExecution.AfterMethodExecutionException::class.java)
-                assertThat(result.exception.suppressed).containsExactlyInAnyOrder(exception1, exception2)
+                expectThat(result.exception).isA<ScenarioExecution.AfterMethodExecutionException>()
+                expectThat(result.exception.suppressed).toList().containsExactlyInAnyOrder(exception1, exception2)
             }
 
             @Test

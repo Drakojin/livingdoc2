@@ -1,7 +1,8 @@
 package org.livingdoc.engine.execution.examples.scenarios
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import strikt.api.expectThat
+import strikt.assertions.containsExactly
 import kotlin.reflect.KClass
 
 internal class ScenarioFixtureCheckerTest {
@@ -11,42 +12,42 @@ internal class ScenarioFixtureCheckerTest {
 
     @Test fun `fixture must have default constructor`() {
         val errors = executeCheck(MalformedFixtures.NoDefaultConstructor::class)
-        assertThat(errors).containsExactly("The fixture class <$classPrefix.NoDefaultConstructor> has no default constructor!")
+        expectThat(errors).containsExactly("The fixture class <$classPrefix.NoDefaultConstructor> has no default constructor!")
     }
 
     @Test fun `before methods must not have parameters`() {
         val errors = executeCheck(MalformedFixtures.BeforeWithParameter::class)
-        assertThat(errors).containsExactly("@Before method <${methodPrefix}BeforeWithParameter.before(java.lang.String)> has 1 parameter(s) - must not have any!")
+        expectThat(errors).containsExactly("@Before method <${methodPrefix}BeforeWithParameter.before(java.lang.String)> has 1 parameter(s) - must not have any!")
     }
 
     @Test fun `before methods must not be static`() {
         val errors = executeCheck(MalformedFixtures.StaticBeforeMethod::class)
-        assertThat(errors).containsExactly("@Before method <static ${methodPrefix}StaticBeforeMethod.before()> must not be static!")
+        expectThat(errors).containsExactly("@Before method <static ${methodPrefix}StaticBeforeMethod.before()> must not be static!")
     }
 
     @Test fun `step methods cannot share an alias`() {
         val errors = executeCheck(MalformedFixtures.StepMethodsWithSameAlias::class)
-        assertThat(errors).containsExactly("Alias <step> is used multiple times!")
+        expectThat(errors).containsExactly("Alias <step> is used multiple times!")
     }
 
     @Test fun `step methods must not be static`() {
         val errors = executeCheck(MalformedFixtures.StaticStepMethod::class)
-        assertThat(errors).containsExactly("@Step method <static ${methodPrefix}StaticStepMethod.step()> must not be static!")
+        expectThat(errors).containsExactly("@Step method <static ${methodPrefix}StaticStepMethod.step()> must not be static!")
     }
 
     @Test fun `step templates and annotated methods must have same number of parameters`() {
         val errors = executeCheck(MalformedFixtures.MismatchingParameterNumber::class)
-        assertThat(errors).containsExactly("Method <${methodPrefix}MismatchingParameterNumber.step()> is annotated with a step template which has wrong parameter count: 'step with {parameter}'")
+        expectThat(errors).containsExactly("Method <${methodPrefix}MismatchingParameterNumber.step()> is annotated with a step template which has wrong parameter count: 'step with {parameter}'")
     }
 
     @Test fun `after methods must not have parameters`() {
         val errors = executeCheck(MalformedFixtures.AfterWithParameter::class)
-        assertThat(errors).containsExactly("@After method <${methodPrefix}AfterWithParameter.after(java.lang.String)> has 1 parameter(s) - must not have any!")
+        expectThat(errors).containsExactly("@After method <${methodPrefix}AfterWithParameter.after(java.lang.String)> has 1 parameter(s) - must not have any!")
     }
 
     @Test fun `after methods must not be static`() {
         val errors = executeCheck(MalformedFixtures.StaticAfterMethod::class)
-        assertThat(errors).containsExactly("@After method <static ${methodPrefix}StaticAfterMethod.after()> must not be static!")
+        expectThat(errors).containsExactly("@After method <static ${methodPrefix}StaticAfterMethod.after()> must not be static!")
     }
 
     private fun executeCheck(fixtureClass: KClass<*>): List<String> {

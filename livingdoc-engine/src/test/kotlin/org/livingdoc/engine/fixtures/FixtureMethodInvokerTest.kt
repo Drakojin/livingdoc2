@@ -1,12 +1,15 @@
 package org.livingdoc.engine.fixtures
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.livingdoc.engine.fixtures.FixtureMethodInvoker.*
+import strikt.api.expectThat
+import strikt.assertions.isA
+import strikt.assertions.isEqualTo
+import strikt.assertions.isNull
 import java.lang.reflect.Method
 import kotlin.reflect.KClass
 
@@ -21,25 +24,25 @@ internal class FixtureMethodInvokerTest {
         @Test fun `method without parameters`() {
             val method = getMethod("withoutParameters")
             val result = cut.invoke(method, fixture)
-            assertThat(result).isEqualTo("no params")
+            expectThat(result).isEqualTo("no params")
         }
 
         @Test fun `method with one parameter`() {
             val method = getMethod("oneParameter", Boolean::class)
             val result = cut.invoke(method, fixture, arrayOf("true"))
-            assertThat(result).isEqualTo("param: true")
+            expectThat(result).isEqualTo("param: true")
         }
 
         @Test fun `method with two parameters`() {
             val method = getMethod("twoParameters", Boolean::class, Boolean::class)
             val result = cut.invoke(method, fixture, arrayOf("true", "false"))
-            assertThat(result).isEqualTo("firstParam: true, secondParam: false")
+            expectThat(result).isEqualTo("firstParam: true, secondParam: false")
         }
 
         @Test fun `method with no return value`() {
             val method = getMethod("noReturnValue")
             val result = cut.invoke(method, fixture)
-            assertThat(result).isNull()
+            expectThat(result).isNull()
         }
     }
 
@@ -47,35 +50,34 @@ internal class FixtureMethodInvokerTest {
 
         @Test fun `custom exception in case type converter could not be found`() {
             val method = getMethod("typeConverterNotFound", CustomType::class)
-            val exception = assertThrows(FixtureMethodInvocationException::class.java, {
+            val exception = assertThrows(FixtureMethodInvocationException::class.java) {
                 cut.invoke(method, fixture, arrayOf("foo"))
-            })
-            assertThat(exception).hasCauseExactlyInstanceOf(NoTypeConverterFoundException::class.java)
+            }
         }
 
         @Nested inner class `custom exception in case argument number mismatch` {
 
             @Test fun `to few arguments`() {
                 val method = getMethod("oneParameter", Boolean::class)
-                val exception = assertThrows(FixtureMethodInvocationException::class.java, {
+                val exception = assertThrows(FixtureMethodInvocationException::class.java) {
                     cut.invoke(method, fixture, emptyArray())
-                })
-                assertThat(exception).hasCauseExactlyInstanceOf(MismatchedNumberOfArgumentsException::class.java)
+                }
+                expectThat(exception.cause).isA<MismatchedNumberOfArgumentsException>()
             }
 
             @Test fun `to many arguments`() {
                 val method = getMethod("oneParameter", Boolean::class)
-                val exception = assertThrows(FixtureMethodInvocationException::class.java, {
+                val exception = assertThrows(FixtureMethodInvocationException::class.java) {
                     cut.invoke(method, fixture, arrayOf("true", "true"))
-                })
-                assertThat(exception).hasCauseExactlyInstanceOf(MismatchedNumberOfArgumentsException::class.java)
+                }
+                expectThat(exception.cause).isA<MismatchedNumberOfArgumentsException>()
             }
         }
     }
 
     @ValueSource(strings = ["privateMethod", "protectedMethod", "publicMethod"])
     @ParameterizedTest fun `method visibility is ignored`(methodName: String) {
-        assertThat(cut.invoke(getMethod(methodName), fixture)).isEqualTo("worked")
+        expectThat(cut.invoke(getMethod(methodName), fixture)).isEqualTo("worked")
     }
 
     fun getMethod(name: String, vararg parameterTypes: KClass<*>): Method {

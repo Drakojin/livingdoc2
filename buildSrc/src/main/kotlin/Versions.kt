@@ -19,6 +19,7 @@ object Versions {
     val mockk = "1.9.3"
     val logback = "1.2.3"
     val assertJ = "3.11.1"
+    val strikt = "0.22.2"
 
     //Plugins
     val buildScanPlugin = "2.2.1"

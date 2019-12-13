@@ -22,6 +22,7 @@ dependencies {
 	testImplementation ("org.junit.jupiter:junit-jupiter-api:${Versions.junitJupiter}")
 	testImplementation ("org.junit.jupiter:junit-jupiter-params:${Versions.junitJupiter}")
 	testImplementation("io.mockk:mockk:${Versions.mockk}")
+	testImplementation("io.strikt:strikt-core:0.22.2")
 
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junitJupiter}")
 }

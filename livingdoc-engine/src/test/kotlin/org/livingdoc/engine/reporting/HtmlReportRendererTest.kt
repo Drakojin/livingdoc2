@@ -1,7 +1,6 @@
 package org.livingdoc.engine.reporting
 
 import io.mockk.mockk
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.livingdoc.engine.execution.DocumentResult
 import org.livingdoc.engine.execution.Result
@@ -11,6 +10,7 @@ import org.livingdoc.engine.execution.examples.decisiontables.model.RowResult
 import org.livingdoc.engine.execution.examples.scenarios.model.ScenarioResult
 import org.livingdoc.engine.execution.examples.scenarios.model.StepResult
 import org.livingdoc.repositories.model.decisiontable.Header
+import strikt.api.expectThat
 
 internal class HtmlReportRendererTest {
 
@@ -42,7 +42,7 @@ internal class HtmlReportRendererTest {
 
         val renderResult = cut.render(documentResult)
 
-        assertThat(renderResult).isEqualToIgnoringWhitespace(
+        expectThat(renderResult).isEqualIgnoreWhitespace(
                 """
                 <!DOCTYPE html>
                 <html>
@@ -110,7 +110,7 @@ internal class HtmlReportRendererTest {
 
         val renderResult = cut.render(documentResult)
 
-        assertThat(renderResult).isEqualToIgnoringWhitespace(
+        expectThat(renderResult).isEqualIgnoreWhitespace(
                 """
                 <!DOCTYPE html>
                 <html>

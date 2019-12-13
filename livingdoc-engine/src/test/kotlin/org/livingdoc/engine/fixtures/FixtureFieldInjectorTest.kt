@@ -1,12 +1,14 @@
 package org.livingdoc.engine.fixtures
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.livingdoc.engine.fixtures.FixtureFieldInjector.FixtureFieldInjectionException
 import org.livingdoc.engine.fixtures.FixtureFieldInjector.NoTypeConverterFoundException
+import strikt.api.expectThat
+import strikt.assertions.isA
+import strikt.assertions.isEqualTo
 import java.lang.reflect.Field
 
 internal class FixtureFieldInjectorTest {
@@ -18,17 +20,17 @@ internal class FixtureFieldInjectorTest {
     @Test fun `field value can be injected`() {
         val field = getField("testField")
         cut.inject(field, fixture, "true")
-        assertThat(getFieldValue(field)).isEqualTo(true)
+        expectThat(getFieldValue(field)).isEqualTo(true)
         cut.inject(field, fixture, "false")
-        assertThat(getFieldValue(field)).isEqualTo(false)
+        expectThat(getFieldValue(field)).isEqualTo(false)
     }
 
     @Test fun `custom exception in case type converter could not be found`() {
         val field = getField("typeConverterNotFound")
-        val exception = assertThrows(FixtureFieldInjectionException::class.java, {
+        val exception = assertThrows(FixtureFieldInjectionException::class.java) {
             cut.inject(field, fixture, "foo")
-        })
-        assertThat(exception).hasCauseExactlyInstanceOf(NoTypeConverterFoundException::class.java)
+        }
+        expectThat(exception.cause).isA<NoTypeConverterFoundException>()
     }
 
     @ValueSource(strings = ["privateField", "protectedField", "publicField"])
@@ -36,7 +38,7 @@ internal class FixtureFieldInjectorTest {
         val field = getField(fieldName)
         cut.inject(field, fixture, "true")
         val fieldValue = getFieldValue(field)
-        assertThat(fieldValue).isEqualTo(true)
+        expectThat(fieldValue).isEqualTo(true)
     }
 
     fun getField(name: String): Field {

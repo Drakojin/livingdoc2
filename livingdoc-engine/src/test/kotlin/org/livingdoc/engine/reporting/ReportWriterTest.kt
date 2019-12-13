@@ -1,9 +1,22 @@
 package org.livingdoc.engine.reporting
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import strikt.api.Assertion
+import strikt.api.expectThat
+import strikt.assertions.endsWith
+import strikt.assertions.startsWith
 import java.io.File
+
+private fun Assertion.Builder<Array<out File>?>.isNullOrEmpty() =
+    assertThat("is null or empty") {
+        it == null || it.isEmpty()
+    }
+
+private fun Assertion.Builder<Array<out File>>.hasSize(size: Int) =
+    assertThat("is null or empty") {
+        it.size == size
+    }
 
 internal class ReportWriterTest {
 
@@ -25,13 +38,13 @@ internal class ReportWriterTest {
         """.trimIndent()
 
         var listFiles = File("build/livingdoc/reports").listFiles()
-        assertThat(listFiles).isNullOrEmpty()
+        expectThat(listFiles).isNullOrEmpty()
 
         cut.writeToFile(textToWrite)
 
         listFiles = File("build/livingdoc/reports").listFiles()
-        assertThat(listFiles).hasSize(1)
-        assertThat(listFiles[0].name).startsWith("result").endsWith(".html")
-        assertThat(listFiles[0].readText()).isEqualToIgnoringWhitespace(textToWrite)
+        expectThat(listFiles).hasSize(1)
+        expectThat(listFiles[0].name).startsWith("result").endsWith(".html")
+        expectThat(listFiles[0].readText()).isEqualIgnoreWhitespace(textToWrite)
     }
 }
